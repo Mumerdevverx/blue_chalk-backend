@@ -8,6 +8,7 @@ dotenv.config();
 
 // ✅ IMPORT ROUTES
 const homeRoutes = require('./src/routes/homeRoutes');
+const contactRoutes = require('./src/routes/contactRoutes');
 
 const app = express();
 
@@ -22,15 +23,28 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Error:', err.message));
 
-// ✅ ADD HOME ROUTE
+// ✅ ROUTES
 app.use('/api/home', homeRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Test Route
+// app.get('/', (req, res) => {
+//   res.json({ 
+//     message: 'BlueChalk API is running 🚀',
+//     endpoints: {
+//       home: '/api/home'
+//     }
+//   });
+// });
+
+
+// ✅ TEST ROUTE - SIRF EK BAAR
 app.get('/', (req, res) => {
   res.json({ 
     message: 'BlueChalk API is running 🚀',
     endpoints: {
-      home: '/api/home'
+      home: '/api/home',
+      contact: '/api/contact'
     }
   });
 });
@@ -47,4 +61,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-}); 
+});
