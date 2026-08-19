@@ -10,6 +10,7 @@ dotenv.config();
 const homeRoutes = require('./src/routes/homeRoutes');
 const contactRoutes = require('./src/routes/contactRoutes');
 const footerRoutes = require('./src/routes/footerRoutes');
+const newsRoutes = require('./src/routes/newsRoutes');
 
 const app = express();
 
@@ -28,6 +29,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/home', homeRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/footer', footerRoutes);
+app.use('/api/news', newsRoutes);
 
 // Test Route
 // app.get('/', (req, res) => {
@@ -52,16 +54,28 @@ app.use('/api/footer', footerRoutes);
 // });
 
 // ✅ Updated test route
+// app.get('/', (req, res) => {
+//   res.json({ 
+//     message: 'BlueChalk API is running 🚀',
+//     endpoints: {
+//       home: '/api/home',
+//       contact: '/api/contact',
+//       footer: '/api/footer'
+//     }
+//   });
+// });
+// ✅ Updated test route
 app.get('/', (req, res) => {
   res.json({ 
     message: 'BlueChalk API is running 🚀',
     endpoints: {
       home: '/api/home',
       contact: '/api/contact',
-      footer: '/api/footer'
+      footer: '/api/footer',
+      news: '/api/news'
     }
   });
-});
+}); 
 
 // Error Handler
 app.use((err, req, res, next) => {
