@@ -11,6 +11,7 @@ const homeRoutes = require('./src/routes/homeRoutes');
 const contactRoutes = require('./src/routes/contactRoutes');
 const footerRoutes = require('./src/routes/footerRoutes');
 const newsRoutes = require('./src/routes/newsRoutes');
+const newsimageRoutes = require('./src/routes/newsimageRoutes');
 
 const app = express();
 
@@ -30,6 +31,10 @@ app.use('/api/home', homeRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/footer', footerRoutes);
 app.use('/api/news', newsRoutes);
+app.use('/api/upload', newsimageRoutes);
+
+
+
 
 // Test Route
 // app.get('/', (req, res) => {
