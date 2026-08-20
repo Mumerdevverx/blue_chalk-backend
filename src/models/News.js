@@ -1,10 +1,30 @@
 const mongoose = require('mongoose');
 
+// ✅ Slugify function
+function slugify(text) {
+  if (!text) return 'untitled';
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 const newsSchema = new mongoose.Schema({
   title: {
     type: String,
     required: [true, 'Title is required'],
     trim: true
+  },
+  slug: {
+    type: String,
+    lowercase: true,
+    trim: true,
+    unique: true,
+    default: function() {
+      return slugify(this.title);
+    }
   },
   image: {
     type: String,
@@ -22,10 +42,6 @@ const newsSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Content is required']
   },
-  excerpt: {
-    type: String,
-    default: ''
-  },
   isActive: {
     type: Boolean,
     default: true
@@ -36,18 +52,6 @@ const newsSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
-});
-
-// ✅ Slug auto-generate with virtual or default
-newsSchema.virtual('slug').get(function() {
-  if (this.title) {
-    return this.title
-      .toLowerCase()
-      .replace(/[^a-zA-Z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-  }
-  return '';
 });
 
 module.exports = mongoose.model('News', newsSchema);
