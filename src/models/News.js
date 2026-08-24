@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// ✅ Slugify function
 function slugify(text) {
   if (!text) return 'untitled';
   return text
@@ -12,46 +11,23 @@ function slugify(text) {
 }
 
 const newsSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Title is required'],
-    trim: true
-  },
-  slug: {
-    type: String,
-    lowercase: true,
-    trim: true,
-    unique: true,
-    default: function() {
-      return slugify(this.title);
-    }
-  },
-  image: {
-    type: String,
-    required: [true, 'Image is required']
-  },
-  date: {
-    type: String,
-    required: [true, 'Date is required']
-  },
-  description: {
-    type: String,
-    required: [true, 'Description is required']
-  },
-  content: {
-    type: String,
-    required: [true, 'Content is required']
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  views: {
-    type: Number,
-    default: 0
+  title: { type: String, required: true, trim: true },
+  slug: { type: String, unique: true, sparse: true },
+  image: { type: String, required: true },
+  date: { type: String, required: true },
+  description: { type: String, required: true },
+  content: { type: String, required: true },
+  excerpt: { type: String, default: '' },
+  isActive: { type: Boolean, default: true },
+  views: { type: Number, default: 0 }
+}, { timestamps: true });
+
+// ✅ Fixed pre-save – call next() properly
+newsSchema.pre('save', function(next) {
+  if (this.title) {
+    this.slug = slugify(this.title);
   }
-}, {
-  timestamps: true
+  next(); // ✅ MUST call next()
 });
 
 module.exports = mongoose.model('News', newsSchema);

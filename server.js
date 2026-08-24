@@ -12,6 +12,7 @@ const contactRoutes = require('./src/routes/contactRoutes');
 const footerRoutes = require('./src/routes/footerRoutes');
 const newsRoutes = require('./src/routes/newsRoutes');
 const newsimageRoutes = require('./src/routes/newsimageRoutes');
+const workRoutes = require('./src/routes/workRoutes');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/footer', footerRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/upload', newsimageRoutes);
+app.use('/api/work', workRoutes);
 
 
 
