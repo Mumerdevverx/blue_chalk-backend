@@ -1,12 +1,10 @@
 const HomeItem = require('../models/HomeItem');
 
-// Get all home items
 exports.getHomeItems = async (req, res) => {
   try {
     const items = await HomeItem.find({ isActive: true })
       .sort({ order: 1 })
       .limit(9);
-    
     res.json({
       success: true,
       count: items.length,
@@ -20,27 +18,25 @@ exports.getHomeItems = async (req, res) => {
   }
 };
 
-// ✅ CREATE ITEM - WITH DEBUG LOGS
 exports.createHomeItem = async (req, res) => {
   try {
-    // 🔍 DEBUG: Yeh console.log check karo
     console.log('📦 Request Body:', req.body);
     console.log('📎 Request File:', req.file);
-    console.log('📁 Request Files:', req);
-const { title, type, mediaUrl, link, description, order, isActive } = req.body;    
-    // File upload check
+    
+    const { title, type, link, description, order, isActive } = req.body;
+    let mediaUrl = '';
     if (req.file) {
       mediaUrl = `/uploads/${req.file.filename}`;
+    } else {
+      mediaUrl = req.body.mediaUrl || '';
     }
-
-    console.log('📝 Media URL:', mediaUrl); // 🔍 DEBUG
 
     const item = await HomeItem.create({
       title,
       type,
       mediaUrl,
-      link,
-      description,
+      link: link || '',
+      description: description || '',
       order: order || 0,
       isActive: true
     });
@@ -50,7 +46,7 @@ const { title, type, mediaUrl, link, description, order, isActive } = req.body;
       data: item
     });
   } catch (error) {
-    console.log('❌ Error:', error); // 🔍 DEBUG
+    console.error('❌ Create error:', error);
     res.status(400).json({
       success: false,
       message: error.message
@@ -58,10 +54,10 @@ const { title, type, mediaUrl, link, description, order, isActive } = req.body;
   }
 };
 
-// UPDATE ITEM
+// ✅ FIXED UPDATE
 exports.updateHomeItem = async (req, res) => {
   try {
-    const { title, type, link, description, order, isActive } = req.body;
+    const { title, type, link, description, order, isActive, mediaUrl } = req.body;
     
     const item = await HomeItem.findById(req.params.id);
     if (!item) {
@@ -78,8 +74,11 @@ exports.updateHomeItem = async (req, res) => {
     item.order = order || item.order;
     item.isActive = isActive !== undefined ? isActive : item.isActive;
 
+    // ✅ If file uploaded, use that; else use body.mediaUrl
     if (req.file) {
       item.mediaUrl = `/uploads/${req.file.filename}`;
+    } else if (mediaUrl) {
+      item.mediaUrl = mediaUrl;
     }
 
     await item.save();
@@ -89,6 +88,7 @@ exports.updateHomeItem = async (req, res) => {
       data: item
     });
   } catch (error) {
+    console.error('❌ Update error:', error);
     res.status(400).json({
       success: false,
       message: error.message
@@ -96,18 +96,15 @@ exports.updateHomeItem = async (req, res) => {
   }
 };
 
-// DELETE ITEM
 exports.deleteHomeItem = async (req, res) => {
   try {
     const item = await HomeItem.findByIdAndDelete(req.params.id);
-    
     if (!item) {
       return res.status(404).json({
         success: false,
         message: 'Item not found'
       });
     }
-
     res.json({
       success: true,
       message: 'Item deleted successfully'
