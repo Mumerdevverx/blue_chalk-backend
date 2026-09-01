@@ -11,5 +11,4 @@ const awardSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-// ✅ MODEL NAME CHANGE KARO: 'Award' se 'AwardItem'
-module.exports = mongoose.model('AwardItem', awardSchema);
+module.exports = mongoose.model('Award', awardSchema);

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+// ✅ CORRECT IMPORT – About controller
 const { getAbout, createAbout, updateAbout, deleteAbout } = require('../../controllers/about/aboutController');
 
 router.get('/', getAbout);

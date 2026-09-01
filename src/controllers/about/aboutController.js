@@ -17,6 +17,7 @@ exports.createAbout = async (req, res) => {
     const about = await About.create(req.body);
     res.status(201).json({ success: true, data: about });
   } catch (error) {
+    console.error('❌ About Create Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -27,6 +28,7 @@ exports.updateAbout = async (req, res) => {
     if (!about) return res.status(404).json({ success: false, message: 'About not found' });
     res.json({ success: true, data: about });
   } catch (error) {
+    console.error('❌ About Update Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -37,6 +39,7 @@ exports.deleteAbout = async (req, res) => {
     if (!about) return res.status(404).json({ success: false, message: 'About not found' });
     res.json({ success: true, message: 'About deleted' });
   } catch (error) {
+    console.error('❌ About Delete Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
