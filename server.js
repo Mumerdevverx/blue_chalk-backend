@@ -13,6 +13,13 @@ const footerRoutes = require('./src/routes/footerRoutes');
 const newsRoutes = require('./src/routes/newsRoutes');
 const newsimageRoutes = require('./src/routes/newsimageRoutes');
 const workRoutes = require('./src/routes/workRoutes');
+// Import routes from about folder
+const aboutRoutes = require('./src/routes/about/aboutRoutes');
+const galleryRoutes = require('./src/routes/about/galleryRoutes');
+const clientLogoRoutes = require('./src/routes/about/clientLogoRoutes');
+const awardRoutes = require('./src/routes/about/awardRoutes');
+const teamRoutes = require('./src/routes/about/teamRoutes');
+
 
 const app = express();
 
@@ -34,55 +41,34 @@ app.use('/api/footer', footerRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/upload', newsimageRoutes);
 app.use('/api/work', workRoutes);
+// Use routes about
+app.use('/api/about', aboutRoutes);
+app.use('/api/gallery', galleryRoutes);
+app.use('/api/clients', clientLogoRoutes);
+app.use('/api/awards', awardRoutes);
+app.use('/api/team', teamRoutes);
 
 
 
 
-// Test Route
-// app.get('/', (req, res) => {
-//   res.json({ 
-//     message: 'BlueChalk API is running 🚀',
-//     endpoints: {
-//       home: '/api/home'
-//     }
-//   });
-// });
 
-
-// ✅ TEST ROUTE - SIRF EK BAAR
-// app.get('/', (req, res) => {
-//   res.json({ 
-//     message: 'BlueChalk API is running 🚀',
-//     endpoints: {
-//       home: '/api/home',
-//       contact: '/api/contact'
-//     }
-//   });
-// });
-
-// ✅ Updated test route
-// app.get('/', (req, res) => {
-//   res.json({ 
-//     message: 'BlueChalk API is running 🚀',
-//     endpoints: {
-//       home: '/api/home',
-//       contact: '/api/contact',
-//       footer: '/api/footer'
-//     }
-//   });
-// });
-// ✅ Updated test route
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'BlueChalk API is running 🚀',
     endpoints: {
       home: '/api/home',
       contact: '/api/contact',
       footer: '/api/footer',
-      news: '/api/news'
+      news: '/api/news',
+      work: '/api/work',
+      about: '/api/about',
+      gallery: '/api/gallery',
+      clients: '/api/clients',
+      awards: '/api/awards',
+      team: '/api/team'
     }
   });
-}); 
+});
 
 // Error Handler
 app.use((err, req, res, next) => {
