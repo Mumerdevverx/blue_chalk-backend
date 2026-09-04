@@ -34,10 +34,18 @@ exports.getWorks = async (req, res) => {
     if (category && category !== 'All Projects') {
       filter.category = category;
     }
-    const works = await Work.find(filter).sort({ createdAt: -1 });
-    res.json({ success: true, count: works.length, data: works });
+    // ✅ CHANGE: -1 → 1 for ascending order
+    const works = await Work.find(filter).sort({ createdAt: 1 });
+    res.json({
+      success: true,
+      count: works.length,
+      data: works
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 

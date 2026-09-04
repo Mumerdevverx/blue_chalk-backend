@@ -1,15 +1,5 @@
 const mongoose = require('mongoose');
 
-function slugify(text) {
-  if (!text) return 'untitled';
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 const newsSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   slug: { type: String, unique: true, sparse: true },
@@ -22,12 +12,5 @@ const newsSchema = new mongoose.Schema({
   views: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ✅ Fixed pre-save – call next() properly
-newsSchema.pre('save', function(next) {
-  if (this.title) {
-    this.slug = slugify(this.title);
-  }
-  next(); // ✅ MUST call next()
-});
-
+// ✅ NO pre-save hook – slug generated in controller
 module.exports = mongoose.model('News', newsSchema);
