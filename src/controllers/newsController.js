@@ -1,6 +1,5 @@
 const News = require('../models/News');
 
-// ✅ Slugify function
 function slugify(text) {
   if (!text) return 'untitled';
   return text
@@ -11,7 +10,6 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
-// ✅ Generate unique slug (appends number if duplicate)
 async function generateUniqueSlug(baseSlug) {
   let slug = baseSlug;
   let counter = 1;
@@ -23,7 +21,6 @@ async function generateUniqueSlug(baseSlug) {
   }
 }
 
-// ✅ GET ALL NEWS
 exports.getAllNews = async (req, res) => {
   try {
     const news = await News.find({ isActive: true })
@@ -42,7 +39,6 @@ exports.getAllNews = async (req, res) => {
   }
 };
 
-// ✅ GET NEWS BY SLUG
 exports.getNewsBySlug = async (req, res) => {
   try {
     const news = await News.findOne({ 
@@ -69,7 +65,6 @@ exports.getNewsBySlug = async (req, res) => {
   }
 };
 
-// ✅ GET NEWS BY ID
 exports.getNewsById = async (req, res) => {
   try {
     const news = await News.findById(req.params.id).select('-__v');
@@ -91,10 +86,9 @@ exports.getNewsById = async (req, res) => {
   }
 };
 
-// ✅ CREATE NEWS
 exports.createNews = async (req, res) => {
   try {
-    console.log('📦 Request Body:', req.body);
+    console.log('📦 Creating news:', req.body);
     const requiredFields = ['title', 'image', 'date', 'description', 'content'];
     for (const field of requiredFields) {
       if (!req.body[field]) {
@@ -113,7 +107,7 @@ exports.createNews = async (req, res) => {
       data: news
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Create Error:', error);
     res.status(400).json({
       success: false,
       message: error.message
@@ -121,7 +115,6 @@ exports.createNews = async (req, res) => {
   }
 };
 
-// ✅ UPDATE NEWS
 exports.updateNews = async (req, res) => {
   try {
     if (req.body.title) {
@@ -145,7 +138,7 @@ exports.updateNews = async (req, res) => {
       data: news
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Update Error:', error);
     res.status(400).json({
       success: false,
       message: error.message
@@ -153,7 +146,6 @@ exports.updateNews = async (req, res) => {
   }
 };
 
-// ✅ DELETE NEWS
 exports.deleteNews = async (req, res) => {
   try {
     const news = await News.findByIdAndDelete(req.params.id);
@@ -168,7 +160,7 @@ exports.deleteNews = async (req, res) => {
       message: 'News deleted successfully'
     });
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Delete Error:', error);
     res.status(400).json({
       success: false,
       message: error.message
