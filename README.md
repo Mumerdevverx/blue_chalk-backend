@@ -2,6 +2,15 @@
 
 Node.js, Express, and MongoDB backend for the BlueChalk MERN application.
 
+## Technology
+
+- Node.js and Express 5 for the REST API
+- MongoDB with Mongoose for data storage and modeling
+- Multer for image and media uploads
+- CORS and dotenv for API access and environment configuration
+- JSON Web Tokens and bcryptjs for authentication support
+- Nodemon for development
+
 ## Requirements
 
 - Node.js 18 or newer
