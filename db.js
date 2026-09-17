@@ -19,6 +19,7 @@ const connectDB = async () => {
   }
 
   await connectionPromise;
+  console.log(`MongoDB connected: ${mongoose.connection.name}`);
   return mongoose.connection;
 };
 
