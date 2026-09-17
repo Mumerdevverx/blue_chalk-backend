@@ -2,9 +2,9 @@
   "name": "blue_chalk-backend",
   "version": "1.0.0",
   "type": "commonjs",
-  "main": "server.js",
+  "main": "api/index.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "node server.js",
     "start": "node server.js"
   },
   "keywords": [],
@@ -19,8 +19,5 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.1",
     "multer": "^2.2.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
   }
 }
