@@ -29,6 +29,10 @@ Node.js, Express, and MongoDB backend for the BlueChalk MERN application.
    ```env
    MONGO_URI=mongodb://127.0.0.1:27017/bluechalk
    PORT=5000
+   JWT_SECRET=replace-with-a-long-random-secret
+   JWT_EXPIRES_IN=7d
+   ADMIN_EMAIL=admin@bluechalk.com
+   ADMIN_PASSWORD=admin123
    ```
 
 3. Start the server:
@@ -59,6 +63,10 @@ If `blogId` is omitted, it is stored as `null`.
 Send `multipart/form-data` to `PUT /api/home/:id`. Include `blogId` to link the item to a news post, or send an empty `blogId` to clear the existing link. If `blogId` is omitted, the existing value is unchanged.
 
 ## Main endpoints
+
+- `POST /api/auth/signup` - create an admin account
+- `POST /api/auth/login` - log in and receive a JWT
+- `GET /api/auth/me` - return the authenticated account (`Authorization: Bearer <token>`)
 
 - `GET /api/home` - list active home items
 - `POST /api/home` - create a home item

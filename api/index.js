@@ -17,6 +17,7 @@ const galleryRoutes = require('../src/routes/about/galleryRoutes');
 const clientLogoRoutes = require('../src/routes/about/clientLogoRoutes');
 const awardRoutes = require('../src/routes/about/awardRoutes');
 const teamRoutes = require('../src/routes/about/teamRoutes');
+const authRoutes = require('../src/routes/authRoutes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/api/auth', authRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
