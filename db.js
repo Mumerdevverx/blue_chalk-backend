@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Admin = require('./src/models/Admin');
 
-let connectionPromise;
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 const connectDB = async () => {
   if (!process.env.MONGO_URI) {
@@ -13,36 +17,49 @@ const connectDB = async () => {
     return mongoose.connection;
   }
 
-  if (!connectionPromise) {
-    connectionPromise = mongoose.connect(process.env.MONGO_URI).catch((error) => {
-      connectionPromise = undefined;
-      throw error;
-    });
+  if (!cached.promise || mongoose.connection.readyState === 0) {
+    const opts = {
+      serverSelectionTimeoutMS: 5000,
+    };
+
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts)
+      .then((m) => {
+        console.log(`MongoDB connected: ${m.connection.name}`);
+        // Run default admin initialization asynchronously without blocking if already done
+        ensureDefaultAdmin().catch((err) => console.error('Default admin check failed:', err.message));
+        return m.connection;
+      })
+      .catch((error) => {
+        cached.promise = null;
+        throw error;
+      });
   }
 
-  await connectionPromise;
-  console.log(`MongoDB connected: ${mongoose.connection.name}`);
-  await ensureDefaultAdmin();
+  await cached.promise;
   return mongoose.connection;
 };
 
 const ensureDefaultAdmin = async () => {
-  const email = (process.env.ADMIN_EMAIL || 'admin@bluechalk.com').trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || 'admin123';
-  const passwordHash = await bcrypt.hash(password, 12);
+  try {
+    const email = (process.env.ADMIN_EMAIL || 'admin@bluechalk.com').trim().toLowerCase();
+    const existing = await Admin.findOne({ email });
+    if (existing) {
+      return;
+    }
 
-  await Admin.findOneAndUpdate(
-    { email },
-    {
-      $setOnInsert: {
-        name: 'Blue Chalk Admin',
-        email,
-        passwordHash,
-        role: 'admin'
-      }
-    },
-    { upsert: true, setDefaultsOnInsert: true, returnDocument: 'after' }
-  );
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await Admin.create({
+      name: 'Blue Chalk Admin',
+      email,
+      passwordHash,
+      role: 'admin'
+    });
+    console.log('Default admin created successfully');
+  } catch (error) {
+    console.error('ensureDefaultAdmin error:', error.message);
+  }
 };
 
 module.exports = connectDB;
