@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const workSchema = new mongoose.Schema({
   category: {
     type: String,
-    enum: ['Featured', 'Branded', 'Entertainment', 'Social Impact', 'Documentary', 'All Projects'],
+    enum: ['Featured', 'Branded', 'Entertainment', 'Social Impact', 'Documentary', 'awards', 'All Projects'],
     required: true,
     default: 'All Projects'
   },
