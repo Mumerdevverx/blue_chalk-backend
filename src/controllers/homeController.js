@@ -6,8 +6,7 @@ const HomeItem = require('../models/HomeItem');
 exports.getHomeItems = async (req, res) => {
   try {
     const items = await HomeItem.find({ isActive: true })
-      .sort({ order: 1 })
-      .limit(9);
+      .sort({ order: 1 });
 
     res.json({
       success: true,
