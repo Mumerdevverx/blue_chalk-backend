@@ -1,18 +1,14 @@
 const multer = require('multer');
 const path = require('path');
 
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Files yahan save hongi
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// ─────────────────────────────────────────────────────────────────────────────
+// VERCEL FIX: Use memoryStorage — Vercel's serverless containers have a
+// READ-ONLY filesystem. diskStorage tries to write to 'uploads/' which
+// does NOT exist and CANNOT be created on Vercel → causes ENOENT/EROFS → 500.
+// Files are held in req.file.buffer (RAM). No disk write needed.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// File filter - sirf images and videos
+// File filter - images and videos only
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|mp4|avi|mov|wmv|flv|mkv/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -27,7 +23,7 @@ const fileFilter = (req, file, cb) => {
 
 // Upload configuration
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024 // 50MB limit
   },

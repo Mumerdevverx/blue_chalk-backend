@@ -4,24 +4,22 @@ const multer = require('multer');
 const path = require('path');
 const { uploadImage } = require('../controllers/newsimageController');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, unique + path.extname(file.originalname));
-  }
-});
-
+// ─────────────────────────────────────────────────────────────────────────────
+// VERCEL FIX: Use memoryStorage — Vercel's serverless containers have a
+// READ-ONLY filesystem. diskStorage tries to write to 'uploads/' which
+// does NOT exist and CANNOT be created on Vercel → causes ENOENT/EROFS → 500.
+// memoryStorage keeps the file in req.file.buffer (RAM). No disk write needed.
+// ─────────────────────────────────────────────────────────────────────────────
 const upload = multer({
-  storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // ✅ 20MB limit (20MB)
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|gif|webp/;
     cb(null, allowed.test(path.extname(file.originalname).toLowerCase()));
   }
 });
 
-// ✅ Error handling middleware for multer
+// Error handling wrapper for multer
 router.post('/', (req, res, next) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -41,7 +39,7 @@ router.post('/', (req, res, next) => {
         message: err.message
       });
     }
-    // If no error, proceed to controller
+    // No error — proceed to controller
     uploadImage(req, res);
   });
 });

@@ -1,11 +1,13 @@
-const path = require('path');
-const fs = require('fs');
-
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// VERCEL FIX:
+// - Removed fs.mkdirSync — Vercel's filesystem is read-only, this throws at startup.
+// - Removed req.file.filename — only exists with diskStorage (not memoryStorage).
+// - Now reads req.file.buffer and returns a base64 data URL.
+//   The frontend can use this URL directly in <img src="..."> or store in MongoDB.
+//
+// NOTE: For production scale, replace base64 with a Cloudinary/S3 upload
+//       using req.file.buffer, and store the returned hosted URL instead.
+// ─────────────────────────────────────────────────────────────────────────────
 
 exports.uploadImage = async (req, res) => {
   try {
@@ -16,15 +18,19 @@ exports.uploadImage = async (req, res) => {
       });
     }
 
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // Convert buffer → base64 data URL (works on Vercel, no disk required)
+    const base64 = req.file.buffer.toString('base64');
+    const mimeType = req.file.mimetype;
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
     res.json({
       success: true,
       data: {
-        url: fileUrl,
-        filename: req.file.filename,
+        url: dataUrl,
+        filename: req.file.originalname,
         originalName: req.file.originalname,
-        size: req.file.size
+        size: req.file.size,
+        mimetype: mimeType
       }
     });
   } catch (error) {
