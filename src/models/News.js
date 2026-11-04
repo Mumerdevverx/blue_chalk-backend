@@ -12,5 +12,7 @@ const newsSchema = new mongoose.Schema({
   views: { type: Number, default: 0 }
 }, { timestamps: true });
 
+newsSchema.index({ isActive: 1, createdAt: -1 });
+
 // ✅ NO pre-save hook – slug generated in controller
 module.exports = mongoose.model('News', newsSchema);

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const News = require('../models/News');
 
 function slugify(text) {
@@ -25,7 +26,9 @@ exports.getAllNews = async (req, res) => {
   try {
     const news = await News.find({ isActive: true })
       .select('-__v')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .allowDiskUse(true)
+      .lean();
     res.json({
       success: true,
       count: news.length,
@@ -51,7 +54,7 @@ exports.getNewsBySlug = async (req, res) => {
         message: 'News not found'
       });
     }
-    news.views += 1;
+    news.views = (news.views || 0) + 1;
     await news.save();
     res.json({
       success: true,
@@ -67,6 +70,13 @@ exports.getNewsBySlug = async (req, res) => {
 
 exports.getNewsById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({
+        success: false,
+        message: 'News not found'
+      });
+    }
+
     const news = await News.findById(req.params.id).select('-__v');
     if (!news) {
       return res.status(404).json({
