@@ -16,6 +16,19 @@ function generateTitle(aboutContent) {
   return plainText.substring(0, 50) || 'Untitled Project';
 }
 
+function compareWorksByOrder(a, b) {
+  const aOrder = Number(a.order);
+  const bOrder = Number(b.order);
+  const aHasOrder = Number.isFinite(aOrder) && aOrder > 0;
+  const bHasOrder = Number.isFinite(bOrder) && bOrder > 0;
+
+  if (aHasOrder !== bHasOrder) return aHasOrder ? -1 : 1;
+  if (aHasOrder && aOrder !== bOrder) return aOrder - bOrder;
+
+  const createdAtDifference = new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+  return createdAtDifference || String(a._id).localeCompare(String(b._id));
+}
+
 async function generateUniqueSlug(baseSlug) {
   let slug = baseSlug;
   let counter = 1;
@@ -32,10 +45,16 @@ exports.getWorks = async (req, res) => {
     const { category } = req.query;
     const filter = { isActive: true };
     if (category && category !== 'All Projects') {
-      filter.category = category;
+      if (category === 'Brand' || category === 'Branded') {
+        filter.category = { $in: ['Brand', 'Branded'] };
+      } else if (category === 'Award' || category === 'awards') {
+        filter.category = { $in: ['Award', 'awards'] };
+      } else {
+        filter.category = category;
+      }
     }
-    // ✅ CHANGE: -1 → 1 for ascending order
-    const works = await Work.find(filter).sort({ createdAt: 1 });
+    const works = await Work.find(filter).sort({ order: 1, createdAt: 1, _id: 1 });
+    works.sort(compareWorksByOrder);
     res.json({
       success: true,
       count: works.length,
@@ -71,7 +90,7 @@ exports.getWorkById = async (req, res) => {
 
 exports.createWork = async (req, res) => {
   try {
-    const { aboutContent, category, image, buttonText, showOverlay, overlayType } = req.body;
+    const { aboutContent, category, image, buttonText, showOverlay, overlayType, order } = req.body;
     
     // Generate title from aboutContent
     const title = generateTitle(aboutContent);
@@ -87,6 +106,7 @@ exports.createWork = async (req, res) => {
       aboutContent,
       showOverlay: showOverlay || false,
       overlayType: overlayType || '',
+      order,
       isActive: true
     };
 
