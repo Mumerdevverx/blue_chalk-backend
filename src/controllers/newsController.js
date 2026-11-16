@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const News = require('../models/News');
 
-const DEFAULT_NEWS_PAGE_SIZE = 50;
+const DEFAULT_NEWS_PAGE_SIZE = 200;
 
 function parsePositiveInteger(value, defaultValue) {
   if (value === undefined) return defaultValue;
@@ -54,9 +54,12 @@ exports.getAllNews = async (req, res) => {
 
   try {
     const filter = { isActive: true };
+    const newsFields = req.query.summary === 'true'
+      ? 'title slug image date description isActive views createdAt'
+      : '-__v';
     const [news, count] = await Promise.all([
       News.find(filter)
-        .select('-__v')
+        .select(newsFields)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
