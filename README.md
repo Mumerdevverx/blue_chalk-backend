@@ -73,3 +73,5 @@ Send `multipart/form-data` to `PUT /api/home/:id`. Include `blogId` to link the 
 - `PUT /api/home/:id` - update a home item
 - `DELETE /api/home/:id` - delete a home item
 - `GET /api/news` - list news posts
+
+News listing is paginated: `GET /api/news?page=1&limit=50`. `page` is 1-based, `limit` defaults to 50 and cannot exceed 50. The response keeps the `{ success, count, data }` shape; `count` is the total number of active posts and `data` contains the requested page.

@@ -29,6 +29,19 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.use((req, res, next) => {
+  if (req.method === 'GET' && /^\/api\/news\/?$/.test(req.path)) {
+    const startedAt = Date.now();
+    res.on('finish', () => {
+      console.info(
+        `[news] GET ${req.path} finished with status ${res.statusCode} ` +
+        `in ${Date.now() - startedAt}ms`
+      );
+    });
+  }
+  next();
+});
+
 app.use(async (req, res, next) => {
   try {
     await connectDB();
