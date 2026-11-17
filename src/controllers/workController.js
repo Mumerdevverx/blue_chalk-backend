@@ -40,10 +40,13 @@ async function generateUniqueSlug(baseSlug) {
   }
 }
 
+// ✅ FIXED: getWorks with Pagination & Field Selection
 exports.getWorks = async (req, res) => {
+  const startedAt = Date.now();
   try {
     const { category } = req.query;
     const filter = { isActive: true };
+    
     if (category && category !== 'All Projects') {
       if (category === 'Brand' || category === 'Branded') {
         filter.category = { $in: ['Brand', 'Branded'] };
@@ -53,14 +56,29 @@ exports.getWorks = async (req, res) => {
         filter.category = category;
       }
     }
-    const works = await Work.find(filter).sort({ order: 1, createdAt: 1, _id: 1 });
+
+    // 1. Limit lagayi taake saara data ek sath na aaye
+    const limit = parseInt(req.query.limit) || 50; 
+
+    // 2. aboutContent hata diya taake size chota ho jaye (Admin panel list view ke liye)
+    const works = await Work.find(filter)
+      .select('-aboutContent') 
+      .sort({ order: 1, createdAt: 1, _id: 1 })
+      .limit(limit)
+      .lean(); // lean() performance fast karta hai
+
+    // Custom sort logic barkarar rakha hai
     works.sort(compareWorksByOrder);
+    
+    console.log(`[Work] Fetched in ${Date.now() - startedAt}ms, returned=${works.length}`);
+
     res.json({
       success: true,
       count: works.length,
       data: works
     });
   } catch (error) {
+    console.error(`[Work] Fetch failed in ${Date.now() - startedAt}ms:`, error.message);
     res.status(500).json({
       success: false,
       message: error.message
@@ -80,6 +98,7 @@ exports.getWorkBySlug = async (req, res) => {
 
 exports.getWorkById = async (req, res) => {
   try {
+    // Yahan aboutContent ki zaroorat hoti hai edit ke waqt, isliye full data fetch hoga
     const work = await Work.findById(req.params.id);
     if (!work) return res.status(404).json({ success: false, message: 'Work not found' });
     res.json({ success: true, data: work });
@@ -92,7 +111,6 @@ exports.createWork = async (req, res) => {
   try {
     const { aboutContent, category, image, buttonText, showOverlay, overlayType, order } = req.body;
     
-    // Generate title from aboutContent
     const title = generateTitle(aboutContent);
     const baseSlug = slugify(title);
     const slug = await generateUniqueSlug(baseSlug);
@@ -120,8 +138,7 @@ exports.createWork = async (req, res) => {
 
 exports.updateWork = async (req, res) => {
   try {
-    const { aboutContent, title, slug } = req.body;
-    // If aboutContent updated, regenerate title and slug
+    const { aboutContent } = req.body;
     let updateData = { ...req.body };
     if (aboutContent) {
       const newTitle = generateTitle(aboutContent);
