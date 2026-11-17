@@ -23,11 +23,12 @@ const app = express();
 
 app.use(cors({
   origin: [
-    'https://blue-chalk.vercel.app',         // Main Website
-    'https://blue-chalk-admin.vercel.app',   // Admin Panel (Yeh add kiya hai)
-    'http://localhost:5173',                 // Local frontend
-    'http://localhost:3000',                 // Local admin
-    'http://localhost:5000'                  // Local backend
+    'https://blue-chalk.vercel.app',         // Live Main Website
+    'https://blue-chalk-admin.vercel.app',   // Live Admin Panel
+    'http://localhost:5173',                 // Local Main Website
+    'http://localhost:5174',                 // Local Admin Panel (Yeh add kiya hai)
+    'http://localhost:3000',                 
+    'http://localhost:5000'                  
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
