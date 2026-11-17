@@ -22,6 +22,10 @@ const adminSchema = new mongoose.Schema({
     type: String,
     enum: ['admin', 'user'],
     default: 'admin'
+  },
+  isTrustedAdmin: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

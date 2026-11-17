@@ -75,3 +75,12 @@ Send `multipart/form-data` to `PUT /api/home/:id`. Include `blogId` to link the 
 - `GET /api/news` - list news posts
 
 News listing is paginated: `GET /api/news?page=1&limit=200`. `page` is 1-based, `limit` defaults to 200 and cannot exceed 200. The response keeps the `{ success, count, data }` shape; `count` is the total number of active posts and `data` contains the requested page. To retrieve all posts when `count` is greater than the page size, request subsequent pages (for example, `GET /api/news?page=2&limit=200`) until all `count` records have been fetched.
+
+## All Projects ordering
+
+- `GET /api/work/all-projects/order` - publicly retrieve the saved project ID order. An unset order returns `{ success: true, data: { projectIds: [] } }`.
+- `PUT /api/work/all-projects/order` - save `{ "projectIds": ["<work-id>", ...] }`. This requires a bearer token for a trusted administrator. IDs must be valid, unique, and reference existing Work documents.
+
+The ordering is stored separately from each Work document's `order` field. Public clients can apply the returned IDs to `GET /api/work` without changing category sorting.
+
+Only the database-bootstrap administrator is trusted for this endpoint. Set both `ADMIN_EMAIL` and `ADMIN_PASSWORD` explicitly to establish that trusted account. On startup, an existing account is trusted only if its password matches the configured bootstrap password; accounts created through public signup are not trusted. Existing administrators that do not match those credentials must be reviewed and explicitly marked `isTrustedAdmin: true` in MongoDB before they can save the order. The fallback default account is not trusted for this endpoint.

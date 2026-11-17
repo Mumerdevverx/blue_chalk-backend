@@ -42,19 +42,33 @@ const connectDB = async () => {
 const ensureDefaultAdmin = async () => {
   try {
     const email = (process.env.ADMIN_EMAIL || 'admin@bluechalk.com').trim().toLowerCase();
-    const existing = await Admin.findOne({ email });
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    const hasExplicitBootstrapCredentials = Boolean(
+      process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD
+    );
+    const existing = await Admin.findOne({ email }).select('+passwordHash');
+
     if (existing) {
+      if (
+        !existing.isTrustedAdmin &&
+        hasExplicitBootstrapCredentials &&
+        await bcrypt.compare(password, existing.passwordHash)
+      ) {
+        existing.isTrustedAdmin = true;
+        await existing.save();
+      }
+
       return;
     }
 
-    const password = process.env.ADMIN_PASSWORD || 'admin123';
     const passwordHash = await bcrypt.hash(password, 12);
 
     await Admin.create({
       name: 'Blue Chalk Admin',
       email,
       passwordHash,
-      role: 'admin'
+      role: 'admin',
+      isTrustedAdmin: hasExplicitBootstrapCredentials
     });
     console.log('Default admin created successfully');
   } catch (error) {
