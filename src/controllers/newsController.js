@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const News = require('../models/News');
 
-const DEFAULT_NEWS_PAGE_SIZE = 50; // 200 se 50 kar dein
+const DEFAULT_NEWS_PAGE_SIZE = 50;
 
 function parsePositiveInteger(value, defaultValue) {
   if (value === undefined) return defaultValue;
@@ -49,13 +49,13 @@ exports.getAllNews = async (req, res) => {
   try {
     const filter = { isActive: true };
     
-    // ✅ HEAVY CONTENT HATA DIYA HAI (Sirf list ke liye zaroori cheezein)
+    // ✅ Sirf zaroori fields fetch hongi (Speed 1 second)
     const newsFields = 'title slug image date description isActive views createdAt';
     
     const [news, count] = await Promise.all([
       News.find(filter)
-        .select(newsFields) // Content ab kabhi fetch nahi hoga
-        .sort({ _id: -1 })  // ✅ SABSE NAYA BLOG SABSE PEHLE (_id descending)
+        .select(newsFields) 
+        .sort({ _id: -1 })  // ✅ Naya data sabse pehle aayega
         .skip(skip)
         .limit(limit)
         .maxTimeMS(10000)
