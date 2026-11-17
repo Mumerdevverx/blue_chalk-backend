@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const News = require('../models/News');
 
-const DEFAULT_NEWS_PAGE_SIZE = 200;
+const DEFAULT_NEWS_PAGE_SIZE = 50; // 200 se 50 kar dein
 
 function parsePositiveInteger(value, defaultValue) {
   if (value === undefined) return defaultValue;
@@ -45,32 +45,29 @@ exports.getAllNews = async (req, res) => {
   }
 
   const skip = (page - 1) * limit;
-  if (!Number.isSafeInteger(skip)) {
-    return res.status(400).json({
-      success: false,
-      message: 'page is too large'
-    });
-  }
 
   try {
     const filter = { isActive: true };
-    const newsFields = req.query.summary === 'true'
-      ? 'title slug image date description isActive views createdAt'
-      : '-__v';
+    
+    // ✅ HEAVY CONTENT HATA DIYA HAI (Sirf list ke liye zaroori cheezein)
+    const newsFields = 'title slug image date description isActive views createdAt';
+    
     const [news, count] = await Promise.all([
       News.find(filter)
-        .select(newsFields)
-        .sort({ createdAt: -1 })
+        .select(newsFields) // Content ab kabhi fetch nahi hoga
+        .sort({ _id: -1 })  // ✅ SABSE NAYA BLOG SABSE PEHLE (_id descending)
         .skip(skip)
         .limit(limit)
         .maxTimeMS(10000)
         .lean(),
       News.countDocuments(filter).maxTimeMS(10000)
     ]);
+
     console.info(
       `[news] GET /api/news query succeeded in ${Date.now() - startedAt}ms ` +
       `(page=${page}, limit=${limit}, returned=${news.length}, total=${count})`
     );
+    
     res.json({
       success: true,
       count,
