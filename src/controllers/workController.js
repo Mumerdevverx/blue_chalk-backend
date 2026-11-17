@@ -2,12 +2,7 @@ const Work = require('../models/Work');
 
 function slugify(text) {
   if (!text) return 'untitled';
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  return text.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 function generateTitle(aboutContent) {
@@ -40,52 +35,39 @@ async function generateUniqueSlug(baseSlug) {
   }
 }
 
-// ✅ FIXED: getWorks with Pagination & Field Selection
+// ✅ 1. Get All Works
 exports.getWorks = async (req, res) => {
   const startedAt = Date.now();
   try {
     const { category } = req.query;
     const filter = { isActive: true };
     
-    if (category && category !== 'All Projects') {
-      if (category === 'Brand' || category === 'Branded') {
-        filter.category = { $in: ['Brand', 'Branded'] };
-      } else if (category === 'Award' || category === 'awards') {
-        filter.category = { $in: ['Award', 'awards'] };
+    if (category && category !== 'All Projects' && category !== 'All') {
+      const catLower = category.toLowerCase();
+      if (catLower === 'brand' || catLower === 'branded') {
+        filter.category = { $in: ['Brand', 'Branded', 'brand', 'branded'] };
+      } else if (catLower === 'award' || catLower === 'awards') {
+        filter.category = { $in: ['Award', 'awards', 'award'] };
       } else {
-        filter.category = category;
+        filter.category = new RegExp(`^${category}$`, 'i');
       }
     }
 
-    // 1. Limit lagayi taake saara data ek sath na aaye
-    const limit = parseInt(req.query.limit) || 50; 
-
-    // 2. aboutContent hata diya taake size chota ho jaye (Admin panel list view ke liye)
+    // ✅ Yahan koi limit nahi hai. Saare 142 blogs aayenge.
     const works = await Work.find(filter)
       .select('-aboutContent') 
       .sort({ order: 1, createdAt: 1, _id: 1 })
-      .limit(limit)
-      .lean(); // lean() performance fast karta hai
+      .lean();
 
-    // Custom sort logic barkarar rakha hai
-    works.sort(compareWorksByOrder);
-    
     console.log(`[Work] Fetched in ${Date.now() - startedAt}ms, returned=${works.length}`);
-
-    res.json({
-      success: true,
-      count: works.length,
-      data: works
-    });
+    res.json({ success: true, count: works.length, data: works });
   } catch (error) {
-    console.error(`[Work] Fetch failed in ${Date.now() - startedAt}ms:`, error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    console.error('❌ Get Works Error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ✅ 2. Get Work By Slug
 exports.getWorkBySlug = async (req, res) => {
   try {
     const work = await Work.findOne({ slug: req.params.slug, isActive: true });
@@ -96,9 +78,9 @@ exports.getWorkBySlug = async (req, res) => {
   }
 };
 
+// ✅ 3. Get Work By ID
 exports.getWorkById = async (req, res) => {
   try {
-    // Yahan aboutContent ki zaroorat hoti hai edit ke waqt, isliye full data fetch hoga
     const work = await Work.findById(req.params.id);
     if (!work) return res.status(404).json({ success: false, message: 'Work not found' });
     res.json({ success: true, data: work });
@@ -107,6 +89,7 @@ exports.getWorkById = async (req, res) => {
   }
 };
 
+// ✅ 4. Create Work
 exports.createWork = async (req, res) => {
   try {
     const { aboutContent, category, image, buttonText, showOverlay, overlayType, order } = req.body;
@@ -124,7 +107,7 @@ exports.createWork = async (req, res) => {
       aboutContent,
       showOverlay: showOverlay || false,
       overlayType: overlayType || '',
-      order,
+      order: Number(order) || 0,
       isActive: true
     };
 
@@ -136,6 +119,7 @@ exports.createWork = async (req, res) => {
   }
 };
 
+// ✅ 5. Update Work
 exports.updateWork = async (req, res) => {
   try {
     const { aboutContent } = req.body;
@@ -146,6 +130,10 @@ exports.updateWork = async (req, res) => {
       const baseSlug = slugify(newTitle);
       updateData.slug = await generateUniqueSlug(baseSlug);
     }
+    if (req.body.order !== undefined) {
+      updateData.order = Number(req.body.order);
+    }
+
     const work = await Work.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true
@@ -158,6 +146,7 @@ exports.updateWork = async (req, res) => {
   }
 };
 
+// ✅ 6. Delete Work
 exports.deleteWork = async (req, res) => {
   try {
     const work = await Work.findByIdAndDelete(req.params.id);
