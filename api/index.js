@@ -22,8 +22,15 @@ const authRoutes = require('../src/routes/authRoutes');
 const app = express();
 
 app.use(cors({
-  origin: ['https://blue-chalk.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
+  origin: [
+    'https://blue-chalk.vercel.app',         // Main Website
+    'https://blue-chalk-admin.vercel.app',   // Admin Panel (Yeh add kiya hai)
+    'http://localhost:5173',                 // Local frontend
+    'http://localhost:3000',                 // Local admin
+    'http://localhost:5000'                  // Local backend
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
